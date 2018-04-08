@@ -17,7 +17,7 @@ namespace Exercise2_Reversi.Models
 
         public string GetPrettyPosition()
         {
-            return Converters.Number2String(XPosition, true) + YPosition;
+            return Converters.Number2String(YPosition, true) + (XPosition + 1);
         }
     }
 
