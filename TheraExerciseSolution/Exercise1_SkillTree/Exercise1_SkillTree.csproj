@@ -47,7 +47,6 @@
     <Compile Include="Guides\CharacterGuide.cs" />
     <Compile Include="Models\Character.cs" />
     <Compile Include="Models\Skill.cs" />
-    <Compile Include="Models\TreeNode.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

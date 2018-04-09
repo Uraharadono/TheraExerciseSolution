@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace Exercise1_SkillTree.Extensions
+﻿namespace Exercise1_SkillTree.Extensions
 {
     public static class StringExtensions
     {

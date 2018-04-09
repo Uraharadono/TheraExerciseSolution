@@ -47,18 +47,7 @@ namespace Exercise2_Reversi.Models
 
             // If there is only one left, return that one
             if (numberOfEmptyBoardPieces == 1)
-            {
-                for (int i = 0; i < Height; i++)
-                {
-                    for (int j = 0; j < Width; j++)
-                    {
-                        if (ReversiBoard[i, j].BoardPieceStatus == BoardPieceStatus.EmptyTile)
-                        {
-                            return ReversiBoard[i, j].GetPrettyPosition();
-                        }
-                    }
-                }
-            }
+                return GetThatEmptyTile();
 
             // Valid range for coordinates
             IEnumerable<int> iRange = Enumerable.Range(0, Height - 1);
@@ -225,6 +214,22 @@ namespace Exercise2_Reversi.Models
             if (numberOfSpacesList.Count <= 0)
                 return "none";
             return availableMoves[indexOfHighestSpaces].GetPrettyPosition();
+        }
+
+        // This method will ONLY be called if there is ONLY ONE free field
+        private string GetThatEmptyTile()
+        {
+            for (int i = 0; i < Height; i++)
+            {
+                for (int j = 0; j < Width; j++)
+                {
+                    if (ReversiBoard[i, j].BoardPieceStatus == BoardPieceStatus.EmptyTile)
+                    {
+                        return ReversiBoard[i, j].GetPrettyPosition();
+                    }
+                }
+            }
+            return null;
         }
 
 
