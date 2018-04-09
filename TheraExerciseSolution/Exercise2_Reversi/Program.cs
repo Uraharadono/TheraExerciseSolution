@@ -29,18 +29,18 @@ X O O O . ";
                 Console.WriteLine("board 2: " + result2);
 
                 // 3. Correct Answer: "D3", "C4", "F5", "E6" 
- //               string board3 = @"8 8
- //. . . . . . . . 
- //. . . . . . . . 
- //. . . . . . . . 
- //. . . O X . . . 
- //. . . X O . . . 
- //. . . . . . . . 
- //. . . . . . . . 
- //. . . . . . . . ";
+                string board3 = @"8 8
+ . . . . . . . . 
+ . . . . . . . . 
+ . . . . . . . . 
+ . . . O X . . . 
+ . . . X O . . . 
+ . . . . . . . . 
+ . . . . . . . . 
+ . . . . . . . . ";
 
- //               string result3 = Solution.PlaceToken(board3);
- //               Console.WriteLine("board 3: " + result3);
+                string result3 = Solution.PlaceToken(board3);
+                Console.WriteLine("board 3: " + result3);
 
                 // 4. Correct Answer: "D6 
                 string board4 = @"7 6

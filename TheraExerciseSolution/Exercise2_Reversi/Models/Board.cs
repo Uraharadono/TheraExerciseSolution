@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Text;
 
 namespace Exercise2_Reversi.Models
 {
@@ -60,6 +60,10 @@ namespace Exercise2_Reversi.Models
                 }
             }
 
+            // Valid range for coordinates
+            IEnumerable<int> iRange = Enumerable.Range(0, Height - 1);
+            IEnumerable<int> jRange = Enumerable.Range(0, Width - 1);
+
             List<int> numberOfSpacesList = new List<int>();
             List<BoardPiece> availableMoves = new List<BoardPiece>();
             // Loop trought all of the elements untill you find enemy one
@@ -70,8 +74,10 @@ namespace Exercise2_Reversi.Models
                     if (ReversiBoard[i, j].BoardPieceStatus == BoardPieceStatus.OpponentOwned)
                     {
                         // When enemy one has been found, first check if surrounding tiles are empty or exist at all
-                        IEnumerable<int> iRange = Enumerable.Range(0, Height - 1);
-                        IEnumerable<int> jRange = Enumerable.Range(1, Width - 1);
+
+                        /* =======================
+                         * TOP TO BOTTOM
+                         * ======================= */
 
                         // Left - horizontal search
                         int leftI = i;
@@ -82,7 +88,7 @@ namespace Exercise2_Reversi.Models
                             // Go from that point in all directions looking for our figure
                             if (ReversiBoard[leftI, leftJ].BoardPieceStatus == BoardPieceStatus.EmptyTile)
                             {
-                                int numberOfSpaces = SearchHorizontaly(i, j);
+                                int numberOfSpaces = SearchHorizontallyLeftToRight(i, j);
                                 if (numberOfSpaces > 0)
                                 {
                                     numberOfSpacesList.Add(numberOfSpaces);
@@ -98,7 +104,7 @@ namespace Exercise2_Reversi.Models
                         {
                             if (ReversiBoard[upperLeftI, upperLeftJ].BoardPieceStatus == BoardPieceStatus.EmptyTile)
                             {
-                                int numberOfSpaces = SearchDiagonally(i, j);
+                                int numberOfSpaces = SearchDiagonallyLeftRightTopBottom(i, j);
                                 if (numberOfSpaces > 0)
                                 {
                                     numberOfSpacesList.Add(numberOfSpaces);
@@ -117,7 +123,7 @@ namespace Exercise2_Reversi.Models
                             // Go from that point in all directions looking for our figure
                             if (ReversiBoard[topI, topJ].BoardPieceStatus == BoardPieceStatus.EmptyTile)
                             {
-                                int numberOfSpaces = SearchVertically(i, j);
+                                int numberOfSpaces = SearchVerticallyTopBottom(i, j);
                                 if (numberOfSpaces > 0)
                                 {
                                     numberOfSpacesList.Add(numberOfSpaces);
@@ -126,9 +132,83 @@ namespace Exercise2_Reversi.Models
                             }
                         }
 
+                        /* =======================
+                         * BOTTOM TO TOP
+                         * ======================= */
+
+                        // Bottom - vertical search up
+                        int bottomI = i + 1;
+                        int bottomJ = j;
+                        if (iRange.Contains(bottomI) && jRange.Contains(bottomJ))
+                        {
+                            if (ReversiBoard[bottomI, bottomJ].BoardPieceStatus == BoardPieceStatus.EmptyTile)
+                            {
+                                int numberOfSpaces = SearchVerticallBottomTop(i, j);
+                                if (numberOfSpaces > 0)
+                                {
+                                    numberOfSpacesList.Add(numberOfSpaces);
+                                    availableMoves.Add(ReversiBoard[bottomI, bottomJ]);
+                                }
+                            }
+                        }
+
+                        // Right - Horizontal search from left to right
+                        int rightI = i;
+                        int rightJ = j + 1;
+                        if (iRange.Contains(rightI) && jRange.Contains(rightJ))
+                        {
+                            if (ReversiBoard[rightI, rightJ].BoardPieceStatus == BoardPieceStatus.EmptyTile)
+                            {
+                                int numberOfSpaces = SearchHorizontallyRightToLeft(i, j);
+                                if (numberOfSpaces > 0)
+                                {
+                                    numberOfSpacesList.Add(numberOfSpaces);
+                                    availableMoves.Add(ReversiBoard[rightI, rightJ]);
+                                }
+                            }
+                        }
+
+                        // Bottom Left - horizontal search left up
+                        int bottomRightI = i + 1;
+                        int bottomRightJ = j + 1;
+                        if (iRange.Contains(bottomRightI) && jRange.Contains(bottomRightJ))
+                        {
+                            if (ReversiBoard[bottomRightI, bottomRightJ].BoardPieceStatus == BoardPieceStatus.EmptyTile)
+                            {
+                                int numberOfSpaces = SearchDiagonallyUp(i, j);
+                                if (numberOfSpaces > 0)
+                                {
+                                    numberOfSpacesList.Add(numberOfSpaces);
+                                    availableMoves.Add(ReversiBoard[bottomRightI, bottomRightJ]);
+                                }
+                            }
+                        }
+
+
                     }
                 }
             }
+
+            // If all moves game same length, return them all
+            bool allAvailableMovesSameLength = numberOfSpacesList.All(o => o == numberOfSpacesList[0]);
+            if (allAvailableMovesSameLength)
+            {
+                List<string> vals = availableMoves.Select(s => s.GetPrettyPosition()).ToList();
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < vals.Count; i++)
+                {
+                    if (i == (vals.Count - 1))
+                    {
+                        sb.Append(vals[i]);
+                    }
+                    else
+                    {
+                        sb.Append(vals[i] + ", ");
+                    }
+                }
+                return sb.ToString();
+            }
+
 
             int indexOfHighestSpaces = 0;
             int numberOfHighestSpaces = 0;
@@ -141,17 +221,18 @@ namespace Exercise2_Reversi.Models
                 }
             }
 
-            // I am assuming here there will always be a solution
+
+            if (numberOfSpacesList.Count <= 0)
+                return "none";
             return availableMoves[indexOfHighestSpaces].GetPrettyPosition();
         }
 
 
-
-        private int SearchHorizontaly(int leftI, int leftJ)
+        /* Top bottom */
+        private int SearchHorizontallyLeftToRight(int leftI, int leftJ)
         {
             int counter = 0;
             bool activeUserTileFound = false;
-            leftJ = leftJ + 1; // I do this to imidiatelly go and check next tile, to avoid counting tile I am already in
             for (int j = leftJ; j < Width; j++)
             {
                 if (ReversiBoard[leftI, j].BoardPieceStatus == BoardPieceStatus.OpponentOwned)
@@ -169,14 +250,32 @@ namespace Exercise2_Reversi.Models
                 return counter;
             return 0;
         }
-        private int SearchDiagonally(int leftI, int leftJ)
+        private int SearchVerticallyTopBottom(int leftI, int leftJ)
+        {
+            int counter = 0;
+            bool activeUserTileFound = false;
+            for (int i = leftI; i < Height; i++)
+            {
+                if (ReversiBoard[i, leftJ].BoardPieceStatus == BoardPieceStatus.OpponentOwned)
+                {
+                    counter++;
+                }
+                if (ReversiBoard[i, leftJ].BoardPieceStatus == BoardPieceStatus.ActivePlayerOwned)
+                {
+                    activeUserTileFound = true;
+                    break;
+                }
+            }
+
+            if (activeUserTileFound)
+                return counter;
+            return 0;
+        }
+        private int SearchDiagonallyLeftRightTopBottom(int leftI, int leftJ)
         {
             int counter = 0;
             bool activeUserTileFound = false;
 
-            // I do this to imidiatelly go and check next tile, to avoid counting tile I am already in
-            leftJ = leftJ + 1;
-            leftI = leftI + 1;
             for (int i = leftI; i < Height; i++)
             {
                 for (int j = leftJ; j < Width; j++)
@@ -194,7 +293,7 @@ namespace Exercise2_Reversi.Models
                         }
                     }
                 }
-                if(activeUserTileFound)
+                if (activeUserTileFound)
                     break;
             }
 
@@ -202,24 +301,76 @@ namespace Exercise2_Reversi.Models
                 return counter + 1; //add one more for that starting position
             return 0;
         }
-        private int SearchVertically(int leftI, int leftJ)
+
+        /* Bottom top */
+        private int SearchHorizontallyRightToLeft(int leftI, int leftJ)
         {
             int counter = 0;
             bool activeUserTileFound = false;
-            leftI = leftI + 1; // I do this to imidiatelly go and check next tile, to avoid counting tile I am already in
-            for (int i = leftI; i < Height; i++)
+
+            for (int j = leftJ; j > 0; j--)
             {
-                if (ReversiBoard[i, leftJ].BoardPieceStatus == BoardPieceStatus.OpponentOwned)
+                if (ReversiBoard[leftI, j].BoardPieceStatus == BoardPieceStatus.OpponentOwned)
                 {
                     counter++;
                 }
-                if (ReversiBoard[i, leftJ].BoardPieceStatus == BoardPieceStatus.ActivePlayerOwned)
+                if (ReversiBoard[leftI, j].BoardPieceStatus == BoardPieceStatus.ActivePlayerOwned)
                 {
                     activeUserTileFound = true;
                     break;
                 }
             }
 
+            if (activeUserTileFound)
+                return counter;
+            return 0;
+        }
+        private int SearchVerticallBottomTop(int bottomI, int bottomJ)
+        {
+            int counter = 0;
+            bool activeUserTileFound = false;
+            for (int i = bottomI; i > 0; i--)
+            {
+                if (ReversiBoard[i, bottomJ].BoardPieceStatus == BoardPieceStatus.OpponentOwned)
+                {
+                    counter++;
+                }
+                if (ReversiBoard[i, bottomJ].BoardPieceStatus == BoardPieceStatus.ActivePlayerOwned)
+                {
+                    activeUserTileFound = true;
+                    break;
+                }
+            }
+
+            if (activeUserTileFound)
+                return counter;
+            return 0;
+        }
+        private int SearchDiagonallyUp(int leftI, int leftJ)
+        {
+            int counter = 0;
+            bool activeUserTileFound = false;
+
+            for (int i = leftI; i > 0; i--)
+            {
+                for (int j = leftJ; j > 0; j--)
+                {
+                    if (i == j)
+                    {
+                        if (ReversiBoard[i, j].BoardPieceStatus == BoardPieceStatus.OpponentOwned)
+                        {
+                            counter++;
+                        }
+                        if (ReversiBoard[i, j].BoardPieceStatus == BoardPieceStatus.ActivePlayerOwned)
+                        {
+                            activeUserTileFound = true;
+                            break;
+                        }
+                    }
+                }
+                if (activeUserTileFound)
+                    break;
+            }
             if (activeUserTileFound)
                 return counter;
             return 0;
