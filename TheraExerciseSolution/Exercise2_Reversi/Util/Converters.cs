@@ -4,7 +4,7 @@
     {
         public static string Number2String(int number, bool isCaps)
         {
-            // Use below one if your array doesnt start with 0. But mate you are wrong.
+            // Use below one if your array starts with 1. You n00b.
             // char c = (char)((isCaps ? 65 : 97) + (number - 1));
             char c = (char)((isCaps ? 65 : 97) + number);
 
