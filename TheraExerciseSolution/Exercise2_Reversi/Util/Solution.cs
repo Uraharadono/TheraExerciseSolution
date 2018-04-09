@@ -11,7 +11,10 @@ namespace Exercise2_Reversi.Util
             int width = Convert.ToInt32(dimensions[0]);
             int height = Convert.ToInt32(dimensions[1]);
 
-            /* I didn't check for size of board, because I don't see point at the moment, but if needed would be simple. */
+            /*
+             * I didn't check for size of board, because I didn't see in examples that there were any with wrong size
+             * if needed would be simple. 
+             */
 
             Board myBoard = new Board(width, height);
             Parsers.ParseBoard(board, myBoard);

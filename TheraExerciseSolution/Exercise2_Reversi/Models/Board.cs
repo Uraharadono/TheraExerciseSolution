@@ -11,7 +11,6 @@ namespace Exercise2_Reversi.Models
         public int Width { get; set; }
         public int Height { get; set; }
 
-
         public Board(int width, int height)
         {
             Width = width;
@@ -30,9 +29,9 @@ namespace Exercise2_Reversi.Models
             {
                 for (int j = 0; j < Width; j++)
                 {
-                    Console.Write(ReversiBoard[i, j] + "  ");
+                    Console.Write(ReversiBoard[i, j] + " ");
                 }
-                Console.WriteLine("\n");
+                Console.Write("\n");
             }
         }
 
@@ -172,8 +171,6 @@ namespace Exercise2_Reversi.Models
                                 }
                             }
                         }
-
-
                     }
                 }
             }
@@ -198,7 +195,7 @@ namespace Exercise2_Reversi.Models
                 return sb.ToString();
             }
 
-
+            // Find index of highest spaces, and return value
             int indexOfHighestSpaces = 0;
             int numberOfHighestSpaces = 0;
             for (int i = 0; i < numberOfSpacesList.Count; i++)
@@ -215,36 +212,73 @@ namespace Exercise2_Reversi.Models
                 return "none";
             return availableMoves[indexOfHighestSpaces].GetPrettyPosition();
         }
-
-        // This method will ONLY be called if there is ONLY ONE free field
-        private string GetThatEmptyTile()
+        
+        public BoardPiece[] ValidMoves(BoardPieceStatus playerStatus)
         {
-            for (int i = 0; i < Height; i++)
+            List<BoardPiece> Moves = new List<BoardPiece>();
+            for (int col = 0; col < Height; ++col)
             {
-                for (int j = 0; j < Width; j++)
+                for (int row = 0; row < Width; ++row)
                 {
-                    if (ReversiBoard[i, j].BoardPieceStatus == BoardPieceStatus.EmptyTile)
+                    // Making no move at all is always invalid
+                    if (playerStatus == BoardPieceStatus.EmptyTile) continue;
+
+                    // Check if `col` and `row` are in the boundaries of the board and if (`col`, `row`) is an empty square
+                    if (ReversiBoard[col, row].BoardPieceStatus != BoardPieceStatus.EmptyTile) continue;
+
+                    // Flip over the pieces of the other color that become enclosed between two pieces of `color`
+                    bool piecesFlipped = false;                 // Whether or not some pieces are flipped over
+                    for (int dx = -1; dx <= 1; ++dx)
                     {
-                        return ReversiBoard[i, j].GetPrettyPosition();
+                        for (int dy = -1; dy <= 1; ++dy)
+                        {
+                            if (dx == 0 && dy == 0) continue;
+
+                            // Determine the amount of steps that we should go in the current direction until we encounter a piece of our own color
+                            // Then, if we find a piece of our own color, flip over all pieces in between
+                            // If we do encounter such a piece, or if we encounter an empty square first, we won't flip over any pieces
+                            for (int steps = 1; steps <= Math.Max(Height, Width); ++steps)
+                            {
+                                int currX = col + steps * dx;
+                                int currY = row + steps * dy;
+                                if (currX < 0 || currX >= Height || currY < 0 || currY >= Width || ReversiBoard[currX, currY].BoardPieceStatus == BoardPieceStatus.EmptyTile)
+                                    break;
+
+                                if (ReversiBoard[currX, currY].BoardPieceStatus == playerStatus)
+                                {
+                                    piecesFlipped = piecesFlipped || steps > 1;
+                                    break;
+                                }
+                            }
+                        }
                     }
+
+                    // If we've flipped over some pieces, the move was valid
+                    // In that case we only need to place the new piece
+                    // If we haven't flipped over any pieces, then nothing has changed
+                    // In that case we simply return false
+                    if (piecesFlipped)
+                        Moves.Add(ReversiBoard[col, row]);
+                    else
+                        continue;
                 }
             }
-            return null;
-        }
 
+            return Moves.ToArray();
+        }
 
         /* Top bottom */
-        private int SearchHorizontallyLeftToRight(int leftI, int leftJ)
+        private int SearchHorizontallyLeftToRight(int currentI, int currentJ)
         {
             int counter = 0;
             bool activeUserTileFound = false;
-            for (int j = leftJ; j < Width; j++)
+            for (int j = currentJ; j < Width; j++)
             {
-                if (ReversiBoard[leftI, j].BoardPieceStatus == BoardPieceStatus.OpponentOwned)
+                if (ReversiBoard[currentI, j].BoardPieceStatus == BoardPieceStatus.OpponentOwned)
                 {
                     counter++;
                 }
-                if (ReversiBoard[leftI, j].BoardPieceStatus == BoardPieceStatus.ActivePlayerOwned)
+                if (ReversiBoard[currentI, j].BoardPieceStatus == BoardPieceStatus.ActivePlayerOwned)
                 {
                     activeUserTileFound = true;
                     break;
@@ -255,17 +289,17 @@ namespace Exercise2_Reversi.Models
                 return counter;
             return 0;
         }
-        private int SearchVerticallyTopBottom(int leftI, int leftJ)
+        private int SearchVerticallyTopBottom(int currentI, int currentJ)
         {
             int counter = 0;
             bool activeUserTileFound = false;
-            for (int i = leftI; i < Height; i++)
+            for (int i = currentI; i < Height; i++)
             {
-                if (ReversiBoard[i, leftJ].BoardPieceStatus == BoardPieceStatus.OpponentOwned)
+                if (ReversiBoard[i, currentJ].BoardPieceStatus == BoardPieceStatus.OpponentOwned)
                 {
                     counter++;
                 }
-                if (ReversiBoard[i, leftJ].BoardPieceStatus == BoardPieceStatus.ActivePlayerOwned)
+                if (ReversiBoard[i, currentJ].BoardPieceStatus == BoardPieceStatus.ActivePlayerOwned)
                 {
                     activeUserTileFound = true;
                     break;
@@ -276,14 +310,14 @@ namespace Exercise2_Reversi.Models
                 return counter;
             return 0;
         }
-        private int SearchDiagonallyLeftRightTopBottom(int leftI, int leftJ)
+        private int SearchDiagonallyLeftRightTopBottom(int currentI, int currentJ)
         {
             int counter = 0;
             bool activeUserTileFound = false;
 
-            for (int i = leftI; i < Height; i++)
+            for (int i = currentI; i < Height; i++)
             {
-                for (int j = leftJ; j < Width; j++)
+                for (int j = currentJ; j < Width; j++)
                 {
                     if (i == j)
                     {
@@ -308,18 +342,18 @@ namespace Exercise2_Reversi.Models
         }
 
         /* Bottom top */
-        private int SearchHorizontallyRightToLeft(int leftI, int leftJ)
+        private int SearchHorizontallyRightToLeft(int currentI, int currentJ)
         {
             int counter = 0;
             bool activeUserTileFound = false;
 
-            for (int j = leftJ; j > 0; j--)
+            for (int j = currentJ; j > 0; j--)
             {
-                if (ReversiBoard[leftI, j].BoardPieceStatus == BoardPieceStatus.OpponentOwned)
+                if (ReversiBoard[currentI, j].BoardPieceStatus == BoardPieceStatus.OpponentOwned)
                 {
                     counter++;
                 }
-                if (ReversiBoard[leftI, j].BoardPieceStatus == BoardPieceStatus.ActivePlayerOwned)
+                if (ReversiBoard[currentI, j].BoardPieceStatus == BoardPieceStatus.ActivePlayerOwned)
                 {
                     activeUserTileFound = true;
                     break;
@@ -351,14 +385,14 @@ namespace Exercise2_Reversi.Models
                 return counter;
             return 0;
         }
-        private int SearchDiagonallyUp(int leftI, int leftJ)
+        private int SearchDiagonallyUp(int currentI, int currentJ)
         {
             int counter = 0;
             bool activeUserTileFound = false;
 
-            for (int i = leftI; i > 0; i--)
+            for (int i = currentI; i > 0; i--)
             {
-                for (int j = leftJ; j > 0; j--)
+                for (int j = currentJ; j > 0; j--)
                 {
                     if (i == j)
                     {
@@ -381,62 +415,6 @@ namespace Exercise2_Reversi.Models
             return 0;
         }
 
-        public BoardPiece[] ValidMoves(BoardPieceStatus color)
-        {
-            List<BoardPiece> Moves = new List<BoardPiece>();
-            for (int col = 0; col < Height; ++col)
-            {
-                for (int row = 0; row < Width; ++row)
-                {
-                    // Making no move at all is always invalid
-                    if (color == BoardPieceStatus.EmptyTile) continue;
-
-                    // Check if `col` and `row` are in the boundaries of the board and if (`col`, `row`) is an empty square
-                    if (ReversiBoard[col, row].BoardPieceStatus != BoardPieceStatus.EmptyTile) continue;
-
-                    // Flip over the pieces of the other color that become enclosed between two pieces of `color`
-                    bool piecesFlipped = false;                 // Whether or not some pieces are flipped over
-                    for (int dx = -1; dx <= 1; ++dx)
-                    {
-                        for (int dy = -1; dy <= 1; ++dy)
-                        {
-                            if (dx == 0 && dy == 0) continue;
-
-                            // Determine the amount of steps that we should go in the current direction until we encounter a piece of our own color
-                            // Then, if we find a piece of our own color, flip over all pieces in between
-                            // If we do encounter such a piece, or if we encounter an empty square first, we won't flip over any pieces
-                            for (int steps = 1; steps <= Math.Max(Width, Height); ++steps)
-                            {
-                                int currX = col + steps * dx;
-                                int currY = row + steps * dy;
-
-                                if (currX < 0 || currX >= Width || currY < 0 || currY >= Height || ReversiBoard[currY, currX].BoardPieceStatus == BoardPieceStatus.EmptyTile)
-                                    break;
-
-                                if (ReversiBoard[currX, currY].BoardPieceStatus == color)
-                                {
-                                    piecesFlipped = piecesFlipped || steps > 1;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    // If we've flipped over some pieces, the move was valid
-                    // In that case we only need to place the new piece
-                    // If we haven't flipped over any pieces, then nothing has changed
-                    // In that case we simply return false
-                    if (piecesFlipped)
-                        Moves.Add(ReversiBoard[col, row]);
-                    else
-                        continue;
-                }
-            }
-
-            return Moves.ToArray();
-        }
-
-
         public int GetNumberOfEmptyBoardPieces()
         {
             int numberOfEmptyBoardPieces = 0;
@@ -452,6 +430,21 @@ namespace Exercise2_Reversi.Models
             }
 
             return numberOfEmptyBoardPieces;
+        }
+        // This method will ONLY be called if there is ONLY ONE free field
+        private string GetThatEmptyTile()
+        {
+            for (int i = 0; i < Height; i++)
+            {
+                for (int j = 0; j < Width; j++)
+                {
+                    if (ReversiBoard[i, j].BoardPieceStatus == BoardPieceStatus.EmptyTile)
+                    {
+                        return ReversiBoard[i, j].GetPrettyPosition();
+                    }
+                }
+            }
+            return null;
         }
     }
 }
