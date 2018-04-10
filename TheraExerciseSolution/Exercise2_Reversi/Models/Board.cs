@@ -171,6 +171,11 @@ namespace Exercise2_Reversi.Models
                                 }
                             }
                         }
+
+                        /*
+                         * Note: Since I already explained in mail, I didn't fully implement all of the functionalities for search directions, just the ones that can manage first 3 tasks.
+                         * No point in creating others now, since it's invalid solution anyways.
+                         */
                     }
                 }
             }
