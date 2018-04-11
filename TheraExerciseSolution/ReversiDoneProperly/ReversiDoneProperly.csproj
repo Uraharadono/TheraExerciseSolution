@@ -48,6 +48,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\Converters.cs" />
+    <Compile Include="Util\GeneralHelpers.cs" />
+    <Compile Include="Util\Generators.cs" />
     <Compile Include="Util\Parsers.cs" />
     <Compile Include="Util\Solution.cs" />
   </ItemGroup>

@@ -16,7 +16,7 @@
         // In Start one it will always be 0, but sacrifaces have to be made
         public int Steps { get; set; }
 
-        
+        // Did this, instead of overlaping a equality operator because it made some strange error I had no time debugging 
         public bool IsSame(Coordinate other)
         {
             return X == other.X && Y == other.Y;

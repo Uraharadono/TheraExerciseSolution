@@ -30,9 +30,26 @@ namespace ReversiDoneProperly.NModels
             new Coordinate(1, -1)  // South West
          };
 
+        public List<Range> Search(List<string> wordsList)
+        {
+            List <Range>  results = new List<Range>();
+            foreach (var word in wordsList)
+            {
+                var result = Search(word);
+                if (result.Count > 0)
+                {
+                    results.AddRange(result);
+                }
+            }
+
+            return results;
+        }
+
         public List<Range> Search(string word)
         {
+            // This list will contain results for all of directions in this matrix for given search term e.g. ".OX"
             List<Range> results = new List<Range>();
+
             // scan the puzzle line by line
             for (int x = 0; x < Height; x++)
             {
@@ -49,12 +66,13 @@ namespace ReversiDoneProperly.NModels
                         for (int direction = 0; direction < 8; direction++)
                         {
                             Coordinate reference = SearchDirection(chars, x, y, direction);
+                            // If word has been found in this direction, add it then countinue searching in other directions as well
+                            // We might have results in other directions as well
                             if (reference != null)
                             {
                                 results.Add(new Range(start, reference));
                             }
                         }
-                        
                     }
                 }
             }
